@@ -6,3 +6,4 @@ toolz
 seaborn
 scikit-learn
 pandas
+wandb
