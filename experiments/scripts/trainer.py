@@ -18,18 +18,20 @@ class StepsMonitoringWrapper(gym.Wrapper):
         return super().step(action)
 
 
-class ExperimentBase:
-    def __init__(self, train_env: gym.Env, validation_env: gym.Env, max_train_steps: int, validation_episodes: int,
+class Trainer:
+    def __init__(self, env_name: str, max_train_steps: int, validation_episodes: int,
                  logger: Logger = None):
+        self.env_name = env_name
+
         self.max_train_steps = max_train_steps
         self.validation_episodes = validation_episodes
 
-        self.train_env = StepsMonitoringWrapper(train_env)
-        self.validation_env = validation_env
+        self.train_env = StepsMonitoringWrapper(gym.make(env_name))
+        self.validation_env = gym.make(env_name)
 
         self.logger = logger
 
-    def start(self, algorithm: EvolutionaryAlgorithm):
+    def fit(self, algorithm: EvolutionaryAlgorithm):
         gen = 0
         elite = None
         elite_value = None
@@ -50,6 +52,8 @@ class ExperimentBase:
                 })
 
             gen += 1
+
+        return elite, elite_value
 
     @toolz.curry
     def episodic_rewards(self, env, agent, n_episodes=1):
