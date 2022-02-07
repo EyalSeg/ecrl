@@ -3,6 +3,7 @@ import toolz
 
 from agents.agent_typing import Agent
 from algorithms.algorithm_typing import EvolutionaryAlgorithm
+from experiments.scripts.loggers.logger_typing import Logger
 
 
 class StepsMonitoringWrapper(gym.Wrapper):
@@ -18,14 +19,26 @@ class StepsMonitoringWrapper(gym.Wrapper):
 
 
 class ExperimentBase:
-    def __init__(self, train_env: gym.Env, validation_env: gym.Env, max_train_steps: int, validation_episodes: int):
+    def __init__(self, train_env: gym.Env, validation_env: gym.Env, max_train_steps: int, validation_episodes: int,
+                 logger: Logger = None):
         self.max_train_steps = max_train_steps
         self.validation_episodes = validation_episodes
 
         self.train_env = StepsMonitoringWrapper(train_env)
         self.validation_env = validation_env
 
+        self.logger = logger
+
+        self.config = {
+            "environment_name": train_env.unwrapped.spec.id,
+            "max_train_steps": max_train_steps,
+            "validation_episodes": validation_episodes,
+        }
+
     def start(self, algorithm: EvolutionaryAlgorithm):
+        if self.logger:
+            self.logger.log_config(self.config)
+
         gen = 0
         while self.train_env.step_count < self.max_train_steps:
             algorithm.generation()
@@ -33,7 +46,13 @@ class ExperimentBase:
             elite = algorithm.elite
             elite_value = self.validate(elite)
 
-            print(f"gen {gen} \t\ttimesteps {self.train_env.step_count} \t\trewards {elite_value}")
+            if self.logger:
+                self.logger.log({
+                    "train_step": self.train_env.step_count,
+                    "generation": gen,
+                    "train_fitness": algorithm.elite_fitness,
+                    "validation_fitness": elite_value,
+                })
 
             gen += 1
 
@@ -54,4 +73,3 @@ class ExperimentBase:
 
     def validate(self, agent: Agent):
         return self.episodic_rewards(self.validation_env, agent, self.validation_episodes)
-
