@@ -9,7 +9,7 @@ from algorithms.operators import truncated_selection
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
 from loggers.wandb_log import WandbLogger
-from experiments.scripts.trainer import Trainer
+from algorithms.trainer import Trainer
 
 
 if __name__ == "__main__":

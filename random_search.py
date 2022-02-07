@@ -4,7 +4,7 @@ import toolz
 
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent
 from algorithms.random_search import RandomSearch
-from experiments.scripts.trainer import Trainer
+from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
 from loggers.wandb_log import WandbLogger
