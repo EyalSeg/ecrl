@@ -15,12 +15,13 @@ from algorithms.trainer import Trainer
 if __name__ == "__main__":
     parser = ArgumentParser()
 
-    parser.add_argument("env", type=str)
-    parser.add_argument("popsize", type=int)
-    parser.add_argument("validation_episodes", type=int)
-    parser.add_argument("fitness_robustness", type=int)
-    parser.add_argument("mutation_strength", type=float)
-    parser.add_argument("truncation_size", type=int)
+    parser.add_argument("--env", type=str)
+    parser.add_argument("--popsize", type=int)
+    parser.add_argument("--validation_episodes", type=int)
+    parser.add_argument("--fitness_robustness", type=int)
+    parser.add_argument("--mutation_strength", type=float)
+    parser.add_argument("--truncation_size", type=int)
+    parser.add_argument("--train_steps", type=int, default=int(1e6))
 
     args = parser.parse_args()
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     ])
 
     trainer = Trainer(env_name=args.env,
-                      max_train_steps=int(1e6),
+                      max_train_steps=args.train_steps,
                       validation_episodes=args.validation_episodes,
                       logger=logger)
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
                    trainer.train_env.action_space.n]
 
     initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
-    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.robustness)
+    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.fitness_robustness)
     mutator = add_gaussian_noise(args.mutation_strength)
     selector = truncated_selection(args.truncation_size)
 
