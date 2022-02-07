@@ -1,0 +1,6 @@
+from typing import Protocol, Dict
+
+
+class Logger(Protocol):
+    def log_config(self, config: Dict): ...
+    def log(self, metrics: Dict): ...
