@@ -40,11 +40,15 @@ class ExperimentBase:
             self.logger.log_config(self.config)
 
         gen = 0
+        elite = None
+        elite_value = None
+
         while self.train_env.step_count < self.max_train_steps:
             algorithm.generation()
 
-            elite = algorithm.elite
-            elite_value = self.validate(elite)
+            if elite != algorithm.elite:
+                elite = algorithm.elite
+                elite_value = self.validate(elite)
 
             if self.logger:
                 self.logger.log({
