@@ -3,7 +3,7 @@ import toolz
 
 from agents.agent_typing import Agent
 from algorithms.algorithm_typing import EvolutionaryAlgorithm
-from experiments.scripts.loggers.logger_typing import Logger
+from loggers.logger_typing import Logger
 
 
 class StepsMonitoringWrapper(gym.Wrapper):

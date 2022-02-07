@@ -5,10 +5,9 @@ import toolz
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent
 from algorithms.random_search import RandomSearch
 from experiments.scripts.trainer import Trainer
-from experiments.scripts.loggers.composite_logger import CompositeLogger
-from experiments.scripts.loggers.console_logger import ConsoleLogger
-from experiments.scripts.loggers.logger_typing import Logger
-from experiments.scripts.loggers.wandb_log import WandbLogger
+from loggers.composite_logger import CompositeLogger
+from loggers.console_logger import ConsoleLogger
+from loggers.wandb_log import WandbLogger
 
 
 if __name__ == "__main__":

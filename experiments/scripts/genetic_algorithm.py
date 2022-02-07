@@ -6,9 +6,9 @@ import toolz
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
 from algorithms.genetic_algorithm import GeneticAlgorithm
 from algorithms.operators import truncated_selection
-from experiments.scripts.loggers.composite_logger import CompositeLogger
-from experiments.scripts.loggers.console_logger import ConsoleLogger
-from experiments.scripts.loggers.wandb_log import WandbLogger
+from loggers.composite_logger import CompositeLogger
+from loggers.console_logger import ConsoleLogger
+from loggers.wandb_log import WandbLogger
 from experiments.scripts.trainer import Trainer
 
 
