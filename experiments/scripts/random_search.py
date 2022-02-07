@@ -21,9 +21,6 @@ class RandomSearchExperiment(ExperimentBase):
         fitness = self.episodic_rewards(self.train_env, n_episodes=fit_robustness)
         self.alg = RandomSearch(initializer, fitness)
 
-        self.config["fitness_robustness"] = fit_robustness
-        self.config["algorithm"] = "Random Search"
-
     def start(self):
         super().start(self.alg)
 
@@ -31,6 +28,8 @@ class RandomSearchExperiment(ExperimentBase):
 if __name__ == "__main__":
     env_name = "Acrobot-v1"
     env = gym.make(env_name)
+    validation_episodes = 100
+    fit_robustness = 20
 
     policy_dims = [sum(env.observation_space.shape),
                    256,
@@ -41,8 +40,19 @@ if __name__ == "__main__":
 
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger("ecrl", "eyal-segal")
+        WandbLogger("ecrl", "eyal-segal", config={
+            "Algorithm": "Random Search",
+            "Environment": env_name,
+            "Validation Episodes": validation_episodes,
+            "Fitness Robustness": 10,
+        })
     ])
 
-    random_search = RandomSearchExperiment(initializer, 20, gym.make(env_name), gym.make(env_name), int(1e6), 100, logger)
+    random_search = RandomSearchExperiment(initializer=initializer,
+                                           train_env=gym.make(env_name),
+                                           validation_env=gym.make(env_name),
+                                           max_train_steps=int(1e6),
+                                           fit_robustness=fit_robustness,
+                                           validation_episodes=validation_episodes,
+                                           logger=logger)
     random_search.start()

@@ -29,16 +29,7 @@ class ExperimentBase:
 
         self.logger = logger
 
-        self.config = {
-            "environment_name": train_env.unwrapped.spec.id,
-            "max_train_steps": max_train_steps,
-            "validation_episodes": validation_episodes,
-        }
-
     def start(self, algorithm: EvolutionaryAlgorithm):
-        if self.logger:
-            self.logger.log_config(self.config)
-
         gen = 0
         elite = None
         elite_value = None
