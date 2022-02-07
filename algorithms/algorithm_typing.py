@@ -7,3 +7,4 @@ class EvolutionaryAlgorithm(Protocol):
     def generation(self): ...
 
     elite: Agent
+    elite_fitness: float
