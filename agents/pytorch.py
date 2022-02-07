@@ -7,6 +7,7 @@ import toolz
 from typing import Literal
 
 device = "cuda:0" if torch.cuda.is_available() else 'cpu'
+print(f"Device is: {device}")
 
 
 class LinearTorchPolicy(nn.Module):
