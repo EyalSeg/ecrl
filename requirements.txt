@@ -1,0 +1,8 @@
+numpy
+tqdm
+gym
+pyglet
+toolz
+seaborn
+scikit-learn
+pandas
