@@ -5,8 +5,9 @@ import toolz
 import numpy as np
 
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
-from algorithms.novelty_search import NoveltySearch, knn_novelty
-from algorithms.operators import truncated_selection
+from algorithms.novelty_search import NoveltySearch
+from algorithms.operators.knn_novelty import knn_novelty
+from algorithms.operators.selection import truncated_selection
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger

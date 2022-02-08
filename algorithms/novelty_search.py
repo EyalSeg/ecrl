@@ -3,8 +3,6 @@ import toolz
 
 from copy import deepcopy
 
-from sklearn.neighbors import NearestNeighbors
-
 
 class NoveltySearch:
     def __init__(self, pop_size, initializer, rollout, novelty_measure, archive_pr, survivors_selector, mutator, robustness):
@@ -72,27 +70,4 @@ class NoveltySearch:
         return avg_fitness, bcs
 
 
-def _get_knn(n, archive):
-    if _get_knn.archive_cache is None or not np.all(archive == _get_knn.archive_cache):
-        # +1 because the archive will contain bc itself, which will add a 0 distance
-        _get_knn.knn_cache = NearestNeighbors(n_neighbors=n + 1)
-        _get_knn.knn_cache.fit(archive)
-
-        _get_knn.archive_cache = archive
-
-    return _get_knn.knn_cache
-
-
-_get_knn.archive_cache = None
-_get_knn.knn_cache = None
-
-
-@toolz.curry
-def knn_novelty(n, bc, archive):
-    knn = _get_knn(n, archive)
-
-    distances, indices = knn.kneighbors(bc.reshape(1, -1))
-    avg = np.sum(distances) / n
-
-    return avg
 
