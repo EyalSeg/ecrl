@@ -8,7 +8,9 @@ from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noi
 from algorithms.novelty_search import NoveltySearch, knn_novelty
 from algorithms.operators import truncated_selection
 from algorithms.trainer import Trainer
+from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
+from loggers.wandb_log import WandbLogger
 
 
 @toolz.curry
@@ -42,7 +44,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    logger = ConsoleLogger()
+    logger = CompositeLogger([
+        ConsoleLogger(),
+        WandbLogger("ecrl", "eyal-segal", config={
+            "Algorithm": "Novelty Search",
+            "Environment": args.env,
+            "Population Size": args.popsize,
+            "Validation Episodes": args.validation_episodes,
+            "Fitness Robustness": args.fitness_robustness,
+            "Mutation Strength": args.mutation_strength,
+            "Truncation Size": args.truncation_size,
+            "Novelty Neighbors": args.novelty_neighbors,
+            "Archive Probability": args.archive_pr,
+        })
+    ])
 
     trainer = Trainer(env_name=args.env,
                       max_train_steps=args.train_steps,
