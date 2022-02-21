@@ -7,3 +7,5 @@ seaborn
 scikit-learn
 pandas
 wandb
+pytorch-lightning
+torch
