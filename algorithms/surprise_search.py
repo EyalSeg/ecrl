@@ -44,10 +44,10 @@ class SurpriseSearch:
 
         else:
             survivors = self.survivors_selector(self.population, self.pop_surprises)
-            parents = np.random.choice(survivors, self.popsize, replace=True)
+            parents = np.random.choice(survivors, self.popsize - 1, replace=True)
             children = [do(self.mutator, deepcopy(parent)) for parent in parents]
 
-            self.population = children
+            self.population = [self.elite] + children
 
             trajectories = [self.rollout(specimen) for specimen in self.population]
             for observations, actions, rewards in trajectories:
