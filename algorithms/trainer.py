@@ -1,5 +1,6 @@
 import gym
 import toolz
+import numpy as np
 
 from agents.agent_typing import Agent
 from algorithms.algorithm_typing import EvolutionaryAlgorithm
@@ -56,19 +57,61 @@ class Trainer:
         return elite, elite_value
 
     @toolz.curry
+    def rollout(self, env, agent, log_trajectory=False, visualize=False):
+        '''
+        :param env:
+        :param agent:
+        :param log_trajectory:
+        :return: Runs a single episode.
+        If logging the trajectory, will return an np arrays of states, actions, and rewards
+         of the entire rollout.
+        Otherwise, will return the sum of rewards.
+        '''
+        if log_trajectory:
+            rewards = np.full(env._max_episode_steps, np.nan)
+            observations = np.full(
+                (env._max_episode_steps, *env.observation_space.shape),
+                np.nan)
+
+            actions = np.full(env._max_episode_steps, np.nan)
+
+            def on_timestep(t, s, a, r):
+                observations[t, :] = s
+                actions[t] = a
+                rewards[t] = r
+
+            retval = lambda t: (observations[:t], actions[:t], rewards[:t])
+
+        else:
+            rewards = [0]
+
+            def on_timestep(t, s, a, r):
+                rewards[0] += r
+
+            retval = lambda t: rewards[0]
+
+        observation = env.reset()
+        done = False
+        timestep = 0
+
+        while not done:
+            if visualize:
+                env.render()
+
+            action = agent.act(observation)
+            observation_, reward, done, info = env.step(action)
+
+            on_timestep(timestep, observation, action, reward)
+
+            observation = observation_
+            timestep += 1
+
+        return retval(timestep)
+
+    @toolz.curry
     def episodic_rewards(self, env, agent, n_episodes=1):
-        rewards = 0
-
-        for _ in range(n_episodes):
-            observation = env.reset()
-            done = False
-
-            while not done:
-                action = agent.act(observation)
-                observation, reward, done, info = env.step(action)
-                rewards += reward
-
-        return rewards / n_episodes
+        rewards = [self.rollout(env, agent, log_trajectory=False) for _ in range(n_episodes)]
+        return sum(rewards) / n_episodes
 
     def validate(self, agent: Agent):
         return self.episodic_rewards(self.validation_env, agent, self.validation_episodes)
