@@ -113,15 +113,17 @@ if __name__ == "__main__":
 
     logger = CompositeLogger([
         ConsoleLogger(),
-        # WandbLogger("ecrl", "eyal-segal", config={
-        #     "Algorithm": "Surprise Search",
-        #     "Environment": args.env,
-        #     "Population Size": args.popsize,
-        #     "Validation Episodes": args.validation_episodes,
-        #     "Fitness Robustness": args.fitness_robustness,
-        #     "Mutation Strength": args.mutation_strength,
-        #     "Truncation Size": args.truncation_size,
-        # })
+        WandbLogger("ecrl", "eyal-segal", config={
+            "Algorithm": "Surprise Search",
+            "Environment": args.env,
+            "Population Size": args.popsize,
+            "Validation Episodes": args.validation_episodes,
+            "Mutation Strength": args.mutation_strength,
+            "Truncation Size": args.truncation_size,
+            "Behavior Learner Epochs": args.behavior_learner_epochs,
+            "Behavior Learning Rate": args.behavior_lr,
+            "Replay Buffer Size": args.replay_buffer_size
+        })
     ])
 
     trainer = Trainer(env_name="Acrobot-v1",
