@@ -12,11 +12,13 @@ class StepsMonitoringWrapper(gym.Wrapper):
         super().__init__(env)
 
         self.step_count = 0
+        self._max_episode_steps = env._max_episode_steps
 
     def step(self, action):
         self.step_count += 1
 
         return super().step(action)
+
 
 
 class Trainer:
