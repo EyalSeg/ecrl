@@ -52,6 +52,6 @@ class SplitReplayBuffer:
         self._split_ratios = split_ratios
 
     def store(self, observations, actions, rewards):
-        buffer = random.choices(self.buffers, weights=self._split_ratios)
+        buffer = random.choices(self.buffers, weights=self._split_ratios)[0]
         buffer.store(observations, actions, rewards)
 
