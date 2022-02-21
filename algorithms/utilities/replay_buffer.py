@@ -1,3 +1,5 @@
+import random
+
 import gym
 import numpy as np
 
@@ -38,3 +40,18 @@ class ReplayBuffer:
         # y_shape = [env.action_space.n]
 
         return cls(x_shape, max_entries)
+
+
+class SplitReplayBuffer:
+    """
+    A buffer split into sub-buffers according to the ratios.
+    Storing will store into a random sub-buffer
+    """
+    def __init__(self, x_shape, max_entries, split_ratios=(0.8, 0.2)):
+        self.buffers = [ReplayBuffer(x_shape, int(max_entries * ratio)) for ratio in split_ratios]
+        self._split_ratios = split_ratios
+
+    def store(self, observations, actions, rewards):
+        buffer = random.choices(self.buffers, weights=self._split_ratios)
+        buffer.store(observations, actions, rewards)
+
