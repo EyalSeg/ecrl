@@ -65,13 +65,15 @@ class BehaviourLearner(pl.LightningModule):
 
 @toolz.curry
 def measure_surprise(behavior_learner, observations, actions, rewards):
-    X = torch.Tensor(observations)
-    y = torch.Tensor(actions)
+    with torch.no_grad():
+        X = torch.Tensor(observations)
+        y = torch.Tensor(actions)
 
-    loss = behavior_learner.get_loss(X, y)
-    surprise = loss.item()
 
-    return surprise
+        loss = behavior_learner.get_loss(X, y)
+        surprise = loss.item()
+
+        return surprise
 
 
 @toolz.curry
