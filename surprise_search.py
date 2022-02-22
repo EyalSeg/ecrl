@@ -23,7 +23,7 @@ from loggers.wandb_log import WandbLogger
 
 class BehaviourLearner(pl.LightningModule):
     def __init__(self, input_dim, output_dim, lr):
-        super(BehaviourLearner, self).__init__()
+        super().__init__()
 
         self.loss_fn = nn.CrossEntropyLoss()
         self.lr = lr
@@ -43,15 +43,15 @@ class BehaviourLearner(pl.LightningModule):
         X, y = train_batch
 
         loss = self.get_loss(X, y)
+        self.log("train_loss", loss)
 
-        return {"loss": loss}
+        return loss
 
     def validation_step(self, validation_batch, batch_idx):
         X, y = validation_batch
 
         loss = self.get_loss(X, y)
-
-        return {"loss": loss}
+        self.log("val_loss", loss)
 
     def get_loss(self, X, y):
         pred = self.forward(X)
