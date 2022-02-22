@@ -75,7 +75,9 @@ def measure_surprise(behavior_learner, observations, actions, rewards):
 
 
 @toolz.curry
-def train_learner(behavior_model, epochs, train_data, validate_data):
+def train_learner(behavior_model, epochs, early_stop_patience, train_data, validate_data):
+    from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+
     train_data = TensorDataset(
         torch.Tensor(train_data['observations']),
         torch.Tensor(train_data['actions'])
@@ -89,7 +91,9 @@ def train_learner(behavior_model, epochs, train_data, validate_data):
     train_loader = DataLoader(train_data, batch_size=1000, shuffle=True, num_workers=4)
     validate_loader = DataLoader(validate_data, batch_size=1000, shuffle=False, num_workers=4)
 
-    trainer = pl.Trainer(max_epochs=epochs)
+    trainer = pl.Trainer(max_epochs=epochs,
+                         log_every_n_steps=1,
+                         callbacks=[EarlyStopping(monitor="val_loss", patience=early_stop_patience)])
 
     trainer.fit(behavior_model, train_loader, validate_loader)
 
@@ -106,6 +110,7 @@ if __name__ == "__main__":
     parser.add_argument("--truncation_size", type=int)
     parser.add_argument("--train_steps", type=int, default=int(1e6))
     parser.add_argument("--behavior_learner_epochs", type=int)
+    parser.add_argument("--behavior_early_stop_patience", type=int)
     parser.add_argument("--behavior_lr", type=float)
     parser.add_argument("--replay_buffer_size", type=int)
 
@@ -122,6 +127,7 @@ if __name__ == "__main__":
             "Truncation Size": args.truncation_size,
             "Behavior Learner Epochs": args.behavior_learner_epochs,
             "Behavior Learning Rate": args.behavior_lr,
+            "Behavior Early Stop Patience": args.behavior_early_stop_patience,
             "Replay Buffer Size": args.replay_buffer_size
         })
     ])
@@ -146,7 +152,7 @@ if __name__ == "__main__":
         popsize=args.popsize,
         initializer=partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims),
         rollout=trainer.rollout(trainer.train_env, log_trajectory=True),
-        train_learner=train_learner(behavior_learner, args.behavior_learner_epochs),
+        train_learner=train_learner(behavior_learner, args.behavior_learner_epochs, args.behavior_early_stop_patience),
         replay_buffer_size=args.replay_buffer_size,
         fitness=lambda observations, actions, rewards: sum(rewards),
         surprise=measure_surprise(behavior_learner),
