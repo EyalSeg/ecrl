@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from functools import partial
 
 import toolz
@@ -11,21 +12,25 @@ from loggers.wandb_log import WandbLogger
 
 
 if __name__ == "__main__":
-    env_name = "Acrobot-v1"
-    validation_episodes = 100
-    fit_robustness = 20
+    parser = ArgumentParser()
+
+    parser.add_argument("--env", type=str)
+    parser.add_argument("--validation_episodes", type=int)
+    parser.add_argument("--fitness_robustness", type=int)
+
+    args = parser.parse_args()
 
     logger = CompositeLogger([
         ConsoleLogger(),
         WandbLogger("ecrl", "eyal-segal", config={
             "Algorithm": "Random Search",
-            "Environment": env_name,
-            "Validation Episodes": validation_episodes,
-            "Fitness Robustness": fit_robustness,
+            "Environment": args.env,
+            "Validation Episodes": args.validation_episodes,
+            "Fitness Robustness": args.fit_robustness,
         })
     ])
 
-    trainer = Trainer(env_name, max_train_steps=int(1e6), validation_episodes=validation_episodes, logger=logger)
+    trainer = Trainer(args.env, max_train_steps=int(1e6), validation_episodes=args.validation_episodes, logger=logger)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
                    256,
@@ -33,7 +38,7 @@ if __name__ == "__main__":
                    trainer.train_env.action_space.n]
 
     initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
-    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=fit_robustness)
+    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.fit_robustness)
 
     rs = RandomSearch(initializer, fitness)
     trainer.fit(rs)
