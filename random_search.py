@@ -27,7 +27,7 @@ if __name__ == "__main__":
             "Algorithm": "Random Search",
             "Environment": args.env,
             "Validation Episodes": args.validation_episodes,
-            "Fitness Robustness": args.fit_robustness,
+            "Fitness Robustness": args.fitness_robustness,
         })
     ])
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
                    trainer.train_env.action_space.n]
 
     initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
-    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.fit_robustness)
+    fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.fitness_robustness)
 
     rs = RandomSearch(initializer, fitness)
     trainer.fit(rs)
