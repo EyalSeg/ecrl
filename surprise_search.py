@@ -132,7 +132,7 @@ if __name__ == "__main__":
         })
     ])
 
-    trainer = Trainer(env_name="Acrobot-v1",
+    trainer = Trainer(env_name=args.env,
                       max_train_steps=args.train_steps,
                       validation_episodes=args.validation_episodes,
                       logger=logger)
