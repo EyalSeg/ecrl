@@ -1,0 +1,21 @@
+program: random_search.py
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --env
+  - Acrobot-v1
+  - --train_steps
+  - 500000
+  - --validation_episodes
+  - 100
+  - ${args}
+method: bayes
+metric:
+  name: validation_fitness
+  goal: maximize
+parameters:
+  fitness_robustness:
+    min: 1
+    max: 20
+
