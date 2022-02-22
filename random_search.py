@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--env", type=str)
     parser.add_argument("--validation_episodes", type=int)
     parser.add_argument("--fitness_robustness", type=int)
+    parser.add_argument("--train_steps", type=int)
 
     args = parser.parse_args()
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
         })
     ])
 
-    trainer = Trainer(args.env, max_train_steps=int(1e6), validation_episodes=args.validation_episodes, logger=logger)
+    trainer = Trainer(args.env, max_train_steps=args.train_steps, validation_episodes=args.validation_episodes, logger=logger)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
                    256,
