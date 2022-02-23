@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from functools import partial
 
 import toolz
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -101,6 +102,20 @@ def train_learner(behavior_model, epochs, early_stop_patience, train_data, valid
 
     # TODO: check if it validates, add short stopping
 
+@toolz.curry
+def robust_rollout(k, rollout, agent, average_rewards=True):
+    rollouts = [rollout(agent) for _ in range(k)]
+    states, actions, rewards = zip(*rollouts)
+
+    states = np.row_stack(states)
+    actions = np.concatenate(actions)
+    rewards = np.concatenate(rewards)
+
+    assert states.shape[0] == len(actions) and len(actions) == len(rewards), \
+        "state-action-rewards are not at the same length!"
+
+    return states, actions, rewards / k if average_rewards else rewards
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -110,6 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--validation_episodes", type=int)
     parser.add_argument("--mutation_strength", type=float)
     parser.add_argument("--truncation_size", type=int)
+    parser.add_argument("--fitness_robustness", type=int)
     parser.add_argument("--train_steps", type=int, default=int(1e6))
     parser.add_argument("--behavior_learner_epochs", type=int)
     parser.add_argument("--behavior_early_stop_patience", type=int)
@@ -127,6 +143,7 @@ if __name__ == "__main__":
             "Validation Episodes": args.validation_episodes,
             "Mutation Strength": args.mutation_strength,
             "Truncation Size": args.truncation_size,
+            "Fitness Robustness": args.fitness_robustness,
             "Behavior Learner Epochs": args.behavior_learner_epochs,
             "Behavior Learning Rate": args.behavior_lr,
             "Behavior Early Stop Patience": args.behavior_early_stop_patience,
@@ -150,10 +167,12 @@ if __name__ == "__main__":
                    512,
                    trainer.train_env.action_space.n]
 
+    rollout = trainer.rollout(trainer.train_env, log_trajectory=True)
+
     ss = SurpriseSearch(
         popsize=args.popsize,
         initializer=partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims),
-        rollout=trainer.rollout(trainer.train_env, log_trajectory=True),
+        rollout=robust_rollout(args.fitness_robustness, rollout),
         train_learner=train_learner(behavior_learner, args.behavior_learner_epochs, args.behavior_early_stop_patience),
         replay_buffer_size=args.replay_buffer_size,
         fitness=lambda observations, actions, rewards: sum(rewards),
