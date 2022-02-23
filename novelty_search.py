@@ -27,7 +27,7 @@ def last_observation_behaviour_characteristic(env, agent):
         timestep += 1
         rewards += reward
 
-    return rewards, np.array(observation + [timestep / 500])
+    return rewards, np.array(observation + [timestep / env._max_episode_steps])
 
 
 if __name__ == "__main__":
