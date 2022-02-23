@@ -163,8 +163,9 @@ if __name__ == "__main__":
     )
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
-                   256,
-                   512,
+                   56,
+                   56,
+                   56,
                    trainer.train_env.action_space.n]
 
     rollout = trainer.rollout(trainer.train_env, log_trajectory=True)

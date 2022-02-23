@@ -34,8 +34,9 @@ if __name__ == "__main__":
     trainer = Trainer(args.env, max_train_steps=args.train_steps, validation_episodes=args.validation_episodes, logger=logger)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
-                   256,
-                   512,
+                   56,
+                   56,
+                   56,
                    trainer.train_env.action_space.n]
 
     initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
