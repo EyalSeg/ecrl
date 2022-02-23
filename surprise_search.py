@@ -30,11 +30,11 @@ class BehaviourLearner(pl.LightningModule):
         self.lr = lr
 
         self.net = torch.nn.Sequential(
-            nn.Linear(input_dim, 256),
+            nn.Linear(input_dim, 56),
             nn.ReLU(),
-            nn.Linear(256, 512),
+            nn.Linear(56, 56),
             nn.ReLU(),
-            nn.Linear(512, output_dim),
+            nn.Linear(56, output_dim),
         )
 
     def forward(self, X):
