@@ -138,16 +138,16 @@ if __name__ == "__main__":
         ConsoleLogger(),
         WandbLogger("ecrl", "eyal-segal", config={
             "Algorithm": "Surprise Search",
-            "Environment": args.env,
-            "Population Size": args.popsize,
-            "Validation Episodes": args.validation_episodes,
-            "Mutation Strength": args.mutation_strength,
-            "Truncation Size": args.truncation_size,
-            "Fitness Robustness": args.fitness_robustness,
-            "Behavior Learner Epochs": args.behavior_learner_epochs,
-            "Behavior Learning Rate": args.behavior_lr,
-            "Behavior Early Stop Patience": args.behavior_early_stop_patience,
-            "Replay Buffer Size": args.replay_buffer_size
+            "env": args.env,
+            "popsize": args.popsize,
+            "validation_episodes": args.validation_episodes,
+            "mutation_strength": args.mutation_strength,
+            "truncation_size": args.truncation_size,
+            "fitness_robustness": args.fitness_robustness,
+            "behavior_learner_epochs": args.behavior_learner_epochs,
+            "behavior_lr": args.behavior_lr,
+            "behavior_early_stop_patience": args.behavior_early_stop_patience,
+            "replay_buffer_size": args.replay_buffer_size
         })
     ])
 

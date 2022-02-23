@@ -57,14 +57,14 @@ if __name__ == "__main__":
         ConsoleLogger(),
         WandbLogger("ecrl", "eyal-segal", config={
             "Algorithm": "Novelty Search",
-            "Environment": args.env,
-            "Population Size": args.popsize,
-            "Validation Episodes": args.validation_episodes,
-            "Fitness Robustness": args.fitness_robustness,
-            "Mutation Strength": args.mutation_strength,
-            "Truncation Size": args.truncation_size,
-            "Novelty Neighbors": args.novelty_neighbors,
-            "Archive Probability": args.archive_pr,
+            "env": args.env,
+            "popsize": args.popsize,
+            "validation_episodes": args.validation_episodes,
+            "fitness_robustness": args.fitness_robustness,
+            "mutation_strength": args.mutation_strength,
+            "truncation_size": args.truncation_size,
+            "novelty_neighbors": args.novelty_neighbors,
+            "archive_pr": args.archive_pr,
         })
     ])
 

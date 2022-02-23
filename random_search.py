@@ -25,9 +25,9 @@ if __name__ == "__main__":
         ConsoleLogger(),
         WandbLogger("ecrl", "eyal-segal", config={
             "Algorithm": "Random Search",
-            "Environment": args.env,
-            "Validation Episodes": args.validation_episodes,
-            "Fitness Robustness": args.fitness_robustness,
+            "env": args.env,
+            "validation_episodes": args.validation_episodes,
+            "fitness_robustness": args.fitness_robustness,
         })
     ])
 
