@@ -32,42 +32,28 @@ class NoveltySearch:
 
             self.population = [self.elite] + [toolz.do(self.mutator, deepcopy(parent)) for parent in parents]
 
-        fit_bcs = [self._robust_rollout(specimen) for specimen in self.population]
+        fit_bcs = [self.rollout(specimen) for specimen in self.population]
         self.population_fitness = [fitness for fitness, bc in fit_bcs]
         pop_bcs = [bc for fitness, bc in fit_bcs]
 
         # measure the novelty vs the archive + current generation
-        archive_ = np.concatenate([self.archive, np.concatenate(pop_bcs)]) if self.archive is not None\
-            else np.concatenate(pop_bcs)
+        archive_ = np.concatenate([self.archive, np.array(pop_bcs)]) if self.archive is not None\
+            else np.array(pop_bcs)
 
-        self.population_novelties = [[self.novelty_measure(bc, archive_) for bc in bcs] for bcs in pop_bcs]
-        self.population_novelties = [sum(novelties) / len(novelties) for novelties in self.population_novelties]
+        self.population_novelties = [self.novelty_measure(bc, archive_) for bc in pop_bcs]
 
         # update the archive
-        newly_archived = [bc for bc in np.concatenate(pop_bcs) if np.random.rand() < self.archive_pr]
+        newly_archived = [np.array(bc) for bc in pop_bcs if np.random.rand() < self.archive_pr]
         if newly_archived:
             newly_archived = np.stack(newly_archived)
-            self.archive = np.concatenate(
-                [self.archive, newly_archived]) if self.archive is not None else newly_archived
+            self.archive = np.concatenate([self.archive, newly_archived]) \
+                if self.archive is not None else newly_archived
 
         elite_idx = np.argmax(self.population_fitness)
         self.elite = self.population[elite_idx]
         self.elite_fitness = self.population_fitness[elite_idx]
 
-    def _robust_rollout(self, specimen):
-        '''
-        performs self.robustness rollouts
 
-        :param specimen:
-        :return:
-        average of their fitnesses and a list of their behaviour characteristics
-        '''
-        fit_bcs = [self.rollout(specimen) for _ in range(self.robustness)]
-
-        avg_fitness = sum([fitness for fitness, bc in fit_bcs]) / self.robustness
-        bcs = [bc for fitness, bc in fit_bcs]
-
-        return avg_fitness, bcs
 
 
 

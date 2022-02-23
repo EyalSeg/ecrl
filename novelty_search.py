@@ -30,6 +30,14 @@ def last_observation_behaviour_characteristic(env, agent):
     return rewards, np.array(observation + [timestep / env._max_episode_steps])
 
 
+@toolz.curry
+def robust_characteristic(k, bc_func, agent):
+    rewards_bcs = [bc_func(agent) for _ in range(k)]
+    rewards, bcs = [reward for reward, bc in rewards_bcs], [bc for reward, bc in rewards_bcs]
+
+    return sum(rewards) / k, sum(bcs) / 5
+
+
 if __name__ == "__main__":
     parser = ArgumentParser()
 
@@ -72,6 +80,7 @@ if __name__ == "__main__":
 
     initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
     rollout = last_observation_behaviour_characteristic(trainer.train_env)
+    robust_rollout = robust_characteristic(args.fitness_robustness, rollout)
     mutator = add_gaussian_noise(args.mutation_strength)
     selector = truncated_selection(args.truncation_size)
     novelty_measure = knn_novelty(args.novelty_neighbors)
@@ -79,7 +88,7 @@ if __name__ == "__main__":
     ns = NoveltySearch(
         pop_size=args.popsize,
         initializer=initializer,
-        rollout=rollout,
+        rollout=robust_rollout,
         novelty_measure=novelty_measure,
         archive_pr=args.archive_pr,
         survivors_selector=selector,
