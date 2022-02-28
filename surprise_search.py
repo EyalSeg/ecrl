@@ -1,3 +1,4 @@
+import math
 from argparse import ArgumentParser
 from functools import partial
 
@@ -25,8 +26,9 @@ from loggers.wandb_log import WandbLogger
 class BehaviourLearner(pl.LightningModule):
     def __init__(self, input_dim, output_dim, lr):
         super().__init__()
+        super().to(device)
 
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.CrossEntropyLoss().to(self.device)
         self.lr = lr
 
         self.net = torch.nn.Sequential(
@@ -35,7 +37,18 @@ class BehaviourLearner(pl.LightningModule):
             nn.Linear(56, 56),
             nn.ReLU(),
             nn.Linear(56, output_dim),
-        )
+            nn.Softmax()
+        ).to(self.device)
+
+        self.xavier_init()
+
+    def xavier_init(self):
+        for name, param in self.net.named_parameters():
+            if name.endswith(".bias"):
+                param.data.fill_(0)
+            else:
+                bound = math.sqrt(6) / math.sqrt(param.shape[0] + param.shape[1])
+                param.data.uniform_(-bound, bound)
 
     def forward(self, X):
         return self.net(X)
@@ -56,20 +69,19 @@ class BehaviourLearner(pl.LightningModule):
 
     def get_loss(self, X, y):
         pred = self.forward(X)
-        loss = self.loss_fn(pred, y.squeeze(-1).type(torch.LongTensor))
+        loss = self.loss_fn(pred, y.squeeze(-1).type(torch.LongTensor).to(self.device))
 
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters()) #, lr=self.lr)
         return optimizer
 
 @toolz.curry
 def measure_surprise(behavior_learner, observations, actions, rewards):
     with torch.no_grad():
-        X = torch.Tensor(observations)
-        y = torch.Tensor(actions)
-
+        X = torch.Tensor(observations).to(device)
+        y = torch.Tensor(actions).to(device)
 
         loss = behavior_learner.get_loss(X, y)
         surprise = loss.item()
@@ -82,13 +94,13 @@ def train_learner(behavior_model, epochs, early_stop_patience, train_data, valid
     from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
     train_data = TensorDataset(
-        torch.Tensor(train_data['observations']),
-        torch.Tensor(train_data['actions'])
+        torch.Tensor(train_data['observations']).to(device),
+        torch.Tensor(train_data['actions']).to(device)
     )
 
     validate_data = TensorDataset(
-        torch.Tensor(validate_data['observations']),
-        torch.Tensor(validate_data['actions'])
+        torch.Tensor(validate_data['observations']).to(device),
+        torch.Tensor(validate_data['actions']).to(device)
     )
 
     train_loader = DataLoader(train_data, batch_size=1000, shuffle=True, num_workers=4)
@@ -96,9 +108,17 @@ def train_learner(behavior_model, epochs, early_stop_patience, train_data, valid
 
     trainer = pl.Trainer(max_epochs=epochs,
                          log_every_n_steps=1,
-                         callbacks=[EarlyStopping(monitor="val_loss", patience=early_stop_patience)])
+                         accelerator="gpu",
+                         gpus=1,
+                         auto_lr_find=True,
+                         callbacks=[
+                             EarlyStopping(monitor="val_loss", patience=early_stop_patience)
+                         ])
 
+    trainer.tune(behavior_model, train_loader, validate_loader)
     trainer.fit(behavior_model, train_loader, validate_loader)
+
+    behavior_model.to(device)
 
     # TODO: check if it validates, add short stopping
 
@@ -160,7 +180,7 @@ if __name__ == "__main__":
         input_dim=sum(trainer.train_env.observation_space.shape),
         output_dim=trainer.train_env.action_space.n,
         lr=args.behavior_lr
-    )
+    ).to(device)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
                    56,
@@ -172,7 +192,12 @@ if __name__ == "__main__":
 
     ss = SurpriseSearch(
         popsize=args.popsize,
-        initializer=partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims),
+        initializer=partial(
+            toolz.compose_left(
+                LinearTorchPolicy,
+                TorchPolicyAgent),
+            policy_dims),
+
         rollout=robust_rollout(args.fitness_robustness, rollout),
         train_learner=train_learner(behavior_learner, args.behavior_learner_epochs, args.behavior_early_stop_patience),
         replay_buffer_size=args.replay_buffer_size,
