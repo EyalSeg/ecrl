@@ -24,9 +24,9 @@ from loggers.wandb_log import WandbLogger
 
 
 class BehaviourLearner(pl.LightningModule):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, output_dim, lr=0):
         super().__init__()
-        super().to(device)
+        self.lr = lr
 
         self.loss_fn = nn.CrossEntropyLoss().to(self.device)
 
@@ -73,7 +73,7 @@ class BehaviourLearner(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters()) #, lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
 @toolz.curry
