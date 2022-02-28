@@ -149,6 +149,7 @@ if __name__ == "__main__":
     parser.add_argument("--behavior_learner_epochs", type=int)
     parser.add_argument("--behavior_early_stop_patience", type=int)
     parser.add_argument("--replay_buffer_size", type=int)
+    parser.add_argument("--elite_children", type=int)
 
     args = parser.parse_args()
 
@@ -164,7 +165,8 @@ if __name__ == "__main__":
             "fitness_robustness": args.fitness_robustness,
             "behavior_learner_epochs": args.behavior_learner_epochs,
             "behavior_early_stop_patience": args.behavior_early_stop_patience,
-            "replay_buffer_size": args.replay_buffer_size
+            "replay_buffer_size": args.replay_buffer_size,
+            "elite_children": args.elite_children
         })
     ])
 
@@ -205,6 +207,7 @@ if __name__ == "__main__":
         surprise=measure_surprise(behavior_learner),
         survivors_selector=truncated_selection(args.truncation_size),
         mutator=add_gaussian_noise(args.mutation_strength),
+        elite_children=args.elite_children
     )
 
     trainer.fit(ss)
