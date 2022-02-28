@@ -174,7 +174,11 @@ if __name__ == "__main__":
     trainer = Trainer(env_name=args.env,
                       max_train_steps=args.train_steps,
                       validation_episodes=args.validation_episodes,
-                      logger=logger)
+                      logger=logger,
+                      log_callbacks=[
+                          lambda ss: {"average_surprise": sum(ss.pop_surprises) / len(ss.pop_surprises)},
+                          lambda ss: {"max_surprise": max(ss.pop_surprises)},
+                      ])
 
     behavior_learner = BehaviourLearner(
         input_dim=sum(trainer.train_env.observation_space.shape),
