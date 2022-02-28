@@ -102,8 +102,8 @@ def train_learner(behavior_model, epochs, early_stop_patience, train_data, valid
         torch.Tensor(validate_data['actions']).to(device)
     )
 
-    train_loader = DataLoader(train_data, batch_size=1000, shuffle=True, num_workers=4)
-    validate_loader = DataLoader(validate_data, batch_size=1000, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_data, batch_size=1000, shuffle=True) #, num_workers=4)
+    validate_loader = DataLoader(validate_data, batch_size=1000, shuffle=False) #, num_workers=4)
 
     trainer = pl.Trainer(max_epochs=epochs,
                          log_every_n_steps=1,
