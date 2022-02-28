@@ -1,3 +1,5 @@
+from typing import Callable, List
+
 import gym
 import toolz
 import numpy as np
@@ -20,10 +22,9 @@ class StepsMonitoringWrapper(gym.Wrapper):
         return super().step(action)
 
 
-
 class Trainer:
     def __init__(self, env_name: str, max_train_steps: int, validation_episodes: int,
-                 logger: Logger = None):
+                 logger: Logger = None, log_callbacks: List[Callable[[EvolutionaryAlgorithm], dict]]= None):
         self.env_name = env_name
 
         self.max_train_steps = max_train_steps
@@ -33,6 +34,7 @@ class Trainer:
         self.validation_env = gym.make(env_name)
 
         self.logger = logger
+        self.log_callbacks = log_callbacks
 
     def fit(self, algorithm: EvolutionaryAlgorithm):
         gen = 0
@@ -47,12 +49,18 @@ class Trainer:
                 elite_value = self.validate(elite)
 
             if self.logger:
-                self.logger.log({
+                logs = {
                     "train_step": self.train_env.step_count,
                     "generation": gen,
                     "train_fitness": algorithm.elite_fitness,
                     "validation_fitness": elite_value,
-                })
+                }
+
+                callbacked = [callback(algorithm) for callback in self.log_callbacks]
+                for sublog in callbacked:
+                    logs.update(sublog)
+
+                self.logger.log(logs)
 
             gen += 1
 
