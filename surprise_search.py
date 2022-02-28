@@ -24,12 +24,11 @@ from loggers.wandb_log import WandbLogger
 
 
 class BehaviourLearner(pl.LightningModule):
-    def __init__(self, input_dim, output_dim, lr):
+    def __init__(self, input_dim, output_dim):
         super().__init__()
         super().to(device)
 
         self.loss_fn = nn.CrossEntropyLoss().to(self.device)
-        self.lr = lr
 
         self.net = torch.nn.Sequential(
             nn.Linear(input_dim, 56),
@@ -149,7 +148,6 @@ if __name__ == "__main__":
     parser.add_argument("--train_steps", type=int, default=int(1e6))
     parser.add_argument("--behavior_learner_epochs", type=int)
     parser.add_argument("--behavior_early_stop_patience", type=int)
-    parser.add_argument("--behavior_lr", type=float)
     parser.add_argument("--replay_buffer_size", type=int)
 
     args = parser.parse_args()
@@ -165,7 +163,6 @@ if __name__ == "__main__":
             "truncation_size": args.truncation_size,
             "fitness_robustness": args.fitness_robustness,
             "behavior_learner_epochs": args.behavior_learner_epochs,
-            "behavior_lr": args.behavior_lr,
             "behavior_early_stop_patience": args.behavior_early_stop_patience,
             "replay_buffer_size": args.replay_buffer_size
         })
@@ -183,7 +180,6 @@ if __name__ == "__main__":
     behavior_learner = BehaviourLearner(
         input_dim=sum(trainer.train_env.observation_space.shape),
         output_dim=trainer.train_env.action_space.n,
-        lr=args.behavior_lr
     ).to(device)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
