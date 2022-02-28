@@ -8,7 +8,7 @@ from algorithms.utilities.replay_buffer import ReplayBuffer
 
 class SurpriseSearch:
     def __init__(self, popsize, initializer, rollout, replay_buffer_size, train_learner, fitness,
-                 surprise, survivors_selector, mutator, train_validate_ratio=0.8):
+                 surprise, survivors_selector, mutator, elite_children=1, train_validate_ratio=0.8):
         self.popsize = popsize
         self.initializer = initializer
         self.rollout = rollout
@@ -24,6 +24,7 @@ class SurpriseSearch:
 
         self.elite = None
         self.elite_fitness = None
+        self.elite_children = elite_children
 
         # self.replay_buffer = None
         self.buffer_size = replay_buffer_size
@@ -46,7 +47,8 @@ class SurpriseSearch:
 
         else:
             survivors = self.survivors_selector(self.population, self.pop_surprises)
-            parents = np.random.choice(survivors, self.popsize - 1, replace=True)
+            parents = np.random.choice(survivors, self.popsize - (self.elite_children + 1), replace=True)
+            parents = list(parents) + [self.elite for _ in range(self.elite_children)]
             children = [do(self.mutator, deepcopy(parent)) for parent in parents]
 
             self.population = [self.elite] + children
