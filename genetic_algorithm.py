@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser.add_argument("--mutation_strength", type=float)
     parser.add_argument("--truncation_size", type=int)
     parser.add_argument("--train_steps", type=int, default=int(1e6))
+    parser.add_argument("--elitism", type=int, default=1)
 
     args = parser.parse_args()
 
@@ -35,6 +36,7 @@ if __name__ == "__main__":
             "fitness_robustness": args.fitness_robustness,
             "mutation_strength": args.mutation_strength,
             "truncation_size": args.truncation_size,
+            "elitism": args.elitism
         })
     ])
 
