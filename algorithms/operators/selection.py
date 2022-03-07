@@ -16,7 +16,7 @@ def truncated_selection(truncation_len: int, population: List[Agent], fitnesses:
     return selected
 
 @toolz.curry
-def find_true_elite(candidates_len: int, fitness: FitnessMeasure, robustness: int,
+def find_true_elite(candidates_len: int, fitness: FitnessMeasure[Agent], robustness: int,
                     population: List[Agent], fitnesses: List[Agent]) -> (Agent, float):
 
     candidates = truncated_selection(candidates_len, population, fitnesses)
