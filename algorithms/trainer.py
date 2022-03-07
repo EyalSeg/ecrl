@@ -24,7 +24,7 @@ class StepsMonitoringWrapper(gym.Wrapper):
 
 class Trainer:
     def __init__(self, env_name: str, max_train_steps: int, validation_episodes: int,
-                 logger: Logger = None, log_callbacks: List[Callable[[EvolutionaryAlgorithm], dict]]= None):
+                 logger: Logger = None, log_callbacks: List[Callable[[EvolutionaryAlgorithm], dict]] = ()):
         self.env_name = env_name
 
         self.max_train_steps = max_train_steps
