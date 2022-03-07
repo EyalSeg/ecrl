@@ -20,7 +20,7 @@ def find_true_elite(candidates_len: int, fitness: FitnessMeasure, robustness: in
                     population: List[Agent], fitnesses: List[Agent]) -> (Agent, float):
 
     candidates = truncated_selection(candidates_len, population, fitnesses)
-    agent_episodes = [[fitness(agent) for _ in range(robustness)] for agent in population]
+    agent_episodes = [[fitness(agent) for _ in range(robustness)] for agent in candidates]
     fitnesses = [sum(episodes) / len(episodes) for episodes in agent_episodes]
 
     elite_idx = argmax(fitnesses)
