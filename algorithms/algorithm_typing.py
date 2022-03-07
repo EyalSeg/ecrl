@@ -15,16 +15,6 @@ class Trajectory:
 
 BC = TypeVar('BC')
 
-Initializer = Callable[[], Agent]
-Rollout = Callable[[Agent], Trajectory]
-FitnessMeasure = Callable[[BC], float]
-BatchFitnessMeasure = Callable[[List[BC]], List[float]]
-ArchiveToBatchFitness = Callable[[List[BC]], BatchFitnessMeasure]
-BehaviorCharacteristic = Callable[[Trajectory], BC]
-SurvivorSelector = Callable[[List[Agent], List[float]], List[Agent]]
-Mutator = Callable[[Agent], None]
-EliteExtractor = Callable[[List[Agent], List[float]], Tuple[Agent, float]]
-
 
 class EvolutionaryAlgorithm(Protocol):
     def generation(self): ...
@@ -34,6 +24,17 @@ class EvolutionaryAlgorithm(Protocol):
 
 
 class Archive(Protocol[BC]):
-    def store(self, item: List[BC]) -> None: ...
+    def store(self, items: List[BC]) -> None: ...
+
     def retrieve(self) -> List[BC]: ...
 
+
+Initializer = Callable[[], Agent]
+Rollout = Callable[[Agent], Trajectory]
+FitnessMeasure = Callable[[BC], float]
+BatchFitnessMeasure = Callable[[List[BC]], List[float]]
+ArchiveToBatchFitness = Callable[[Archive], BatchFitnessMeasure]
+BehaviorCharacteristic = Callable[[Trajectory], BC]
+SurvivorSelector = Callable[[List[Agent], List[float]], List[Agent]]
+Mutator = Callable[[Agent], None]
+EliteExtractor = Callable[[List[Agent], List[float]], Tuple[Agent, float]]
