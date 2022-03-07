@@ -11,6 +11,7 @@ from algorithms.algorithm_typing import FitnessMeasure
 def truncated_selection(truncation_len: int, population: List[Agent], fitnesses: List[Agent]):
     fit_pop = [{"specimen": specimen, "fitness": fit} for specimen, fit in zip(population, fitnesses)]
     selected = list(toolz.topk(truncation_len, fit_pop, key=lambda x: x["fitness"]))
+    selected = [x['specimen'] for x in selected]
 
     return selected
 
