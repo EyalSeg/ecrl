@@ -1,21 +1,27 @@
+from typing import List, Union
+
 import numpy as np
 
 from copy import deepcopy
 from toolz import do
 
+from agents.agent_typing import Agent
+from algorithms.algorithm_typing import SurvivorSelector, Mutator, Initializer, Fitness
+
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, survivors_selector, mutator, initializer, fitness):
+    def __init__(self, pop_size: int, survivors_selector: SurvivorSelector, mutator: Mutator,
+                 initializer: Initializer, fitness: Fitness):
         self.pop_size = pop_size
         self.initializer = initializer
         self.mutator = mutator
         self.fitness = fitness
         self.survivors_selector = survivors_selector
 
-        self.population = None
-        self.population_fitness = None
-        self.elite = None
-        self.elite_fitness = None
+        self.population: List[Agent] = []
+        self.population_fitness: List[float] = []
+        self.elite: Union[Agent, None] = None
+        self.elite_fitness: Union[float, None] = None
 
     def generation(self):
         if not self.population:
