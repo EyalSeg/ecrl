@@ -1,57 +1,61 @@
+from typing import List, Union
+
 import numpy as np
 import toolz
 
 from copy import deepcopy
 
+from agents.agent_typing import Agent
+from algorithms.algorithm_typing import Initializer, Rollout, SurvivorSelector, Mutator, Archive, \
+    BehaviorCharacteristic, FitnessMeasure, ArchiveToBatchFitness, EliteExtractor
+
 
 class NoveltySearch:
-    def __init__(self, pop_size, initializer, rollout, novelty_measure, archive_pr, survivors_selector, mutator, robustness):
+    def __init__(self, pop_size, initializer: Initializer, rollout: Rollout,
+                 novelty_from_archive: ArchiveToBatchFitness, elite_extractor: EliteExtractor,
+                 fitness: FitnessMeasure, survivors_selector: SurvivorSelector, mutator: Mutator,
+                 archive: Archive, behavior_characteristic: BehaviorCharacteristic):
         self.initializer = initializer
         self.pop_size = pop_size
         self.rollout = rollout
-        self.novelty_measure = novelty_measure
-        self.archive_pr = archive_pr
+        self.behavior_characteristic = behavior_characteristic
+        self.novelty_from_archive = novelty_from_archive
+        self.fitness_measure = fitness
         self.survivors_selector = survivors_selector
         self.mutator = mutator
-        self.robustness = robustness
+        self.elite_extractor = elite_extractor
 
-        self.population = None
-        self.population_novelties = None
-        self.population_fitness = None
-        self.archive = None
+        self.population: List[Agent] = []
+        self.population_novelties: List[float] = []
+        self.population_fitness: List[float] = []
+        self.archive: Archive = archive
 
-        self.elite = None
-        self.elite_fitness = None
+        self.elite: Union[Agent, None] = None
+        self.elite_fitness: Union[float, None] = None
 
     def generation(self):
         if not self.population:
             self.population = [self.initializer() for _ in range(self.pop_size)]
         else:
             survivors = self.survivors_selector(self.population, self.population_novelties)
-            parents = np.random.choice(survivors, self.pop_size - 1, replace=True)
+            parents = np.random.choice(survivors, self.pop_size - 1, replace=True)  # one for the elite
 
-            self.population = [self.elite] + [toolz.do(self.mutator, deepcopy(parent)) for parent in parents]
+            children = [toolz.do(self.mutator, deepcopy(parent)) for parent in parents]
 
-        fit_bcs = [self.rollout(specimen) for specimen in self.population]
-        self.population_fitness = [fitness for fitness, bc in fit_bcs]
-        pop_bcs = [bc for fitness, bc in fit_bcs]
+            self.population = [self.elite] + children
 
-        # measure the novelty vs the archive + current generation
-        archive_ = np.concatenate([self.archive, np.array(pop_bcs)]) if self.archive is not None\
-            else np.array(pop_bcs)
+        trajectories = [self.rollout(specimen) for specimen in self.population]
+        bcs = [self.behavior_characteristic(traj) for traj in trajectories]
+        self.population_fitness = [self.fitness_measure(traj) for traj in trajectories]
 
-        self.population_novelties = [self.novelty_measure(bc, archive_) for bc in pop_bcs]
+        batch_novelty = self.novelty_from_archive(self.archive)
+        self.population_novelties = batch_novelty(bcs)
 
-        # update the archive
-        newly_archived = [np.array(bc) for bc in pop_bcs if np.random.rand() < self.archive_pr]
-        if newly_archived:
-            newly_archived = np.stack(newly_archived)
-            self.archive = np.concatenate([self.archive, newly_archived]) \
-                if self.archive is not None else newly_archived
+        self.archive.store(bcs)
 
-        elite_idx = np.argmax(self.population_fitness)
-        self.elite = self.population[elite_idx]
-        self.elite_fitness = self.population_fitness[elite_idx]
+        self.elite, self.elite_fitness = self.elite_extractor(self.population, self.population_fitness)
+
+
 
 
 
