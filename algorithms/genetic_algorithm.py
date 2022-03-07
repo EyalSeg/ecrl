@@ -6,13 +6,13 @@ from copy import deepcopy
 from toolz import do
 
 from agents.agent_typing import Agent
-from algorithms.algorithm_typing import SurvivorSelector, Mutator, Initializer, FitnessMeasure
+from algorithms.algorithm_typing import SurvivorSelector, Mutator, Initializer, FitnessMeasure, EliteExtractor
 from algorithms.operators.selection import truncated_selection
 
 
 class GeneticAlgorithm:
     def __init__(self, pop_size: int, survivors_selector: SurvivorSelector, mutator: Mutator,
-                 initializer: Initializer, fitness: FitnessMeasure, elitism: int):
+                 initializer: Initializer, fitness: FitnessMeasure, elitism: int, elite_extractor: EliteExtractor):
         self.pop_size = pop_size
         self.initializer = initializer
         self.mutator = mutator
@@ -20,6 +20,7 @@ class GeneticAlgorithm:
         self.survivors_selector = survivors_selector
         self.n_elites = elitism
         self.elitism = truncated_selection(self.n_elites)
+        self.elite_extractor = elite_extractor
 
         self.population: List[Agent] = []
         self.population_fitness: List[float] = []
@@ -34,12 +35,10 @@ class GeneticAlgorithm:
             parents = np.random.choice(survivors, self.pop_size - self.n_elites, replace=True)
 
             children = [do(self.mutator, deepcopy(parent)) for parent in parents]
-
             elites = self.elitism(self.population, self.population_fitness)
+
             self.population = elites + children
 
         self.population_fitness = [self.fitness(specimen) for specimen in self.population]
 
-        elite_idx = np.argmax(self.population_fitness)
-        self.elite = self.population[elite_idx]
-        self.elite_fitness = self.population_fitness[elite_idx]
+        self.elite, self.elite_fitness = self.elite_extractor(self.population, self.population_fitness)
