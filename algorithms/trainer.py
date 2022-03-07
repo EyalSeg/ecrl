@@ -68,7 +68,9 @@ class Trainer:
 
     @toolz.curry
     def rollout(self, env, agent, visualize=False) -> Trajectory:
-        return self._episode(env, agent, log_trajectory=True, visualize=visualize)
+        observations, actions, rewards = self._episode(env, agent, log_trajectory=True, visualize=visualize)
+
+        return Trajectory(observations=observations, actions=actions, rewards=rewards)
 
     @toolz.curry
     def episodic_rewards(self, env, agent, n_episodes=1) -> float:
