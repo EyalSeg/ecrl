@@ -5,7 +5,7 @@ import toolz
 import numpy as np
 
 from agents.agent_typing import Agent
-from algorithms.algorithm_typing import EvolutionaryAlgorithm
+from algorithms.algorithm_typing import EvolutionaryAlgorithm, Trajectory
 from loggers.logger_typing import Logger
 
 
@@ -67,7 +67,19 @@ class Trainer:
         return elite, elite_value
 
     @toolz.curry
-    def rollout(self, env, agent, log_trajectory=False, visualize=False):
+    def rollout(self, env, agent, visualize=False) -> Trajectory:
+        return self._episode(env, agent, log_trajectory=True, visualize=visualize)
+
+    @toolz.curry
+    def episodic_rewards(self, env, agent, n_episodes=1) -> float:
+        rewards = [self._episode(env, agent, log_trajectory=False) for _ in range(n_episodes)]
+        return sum(rewards) / n_episodes
+
+    def validate(self, agent: Agent) -> float:
+        return self.episodic_rewards(self.validation_env, agent, self.validation_episodes)
+
+    @toolz.curry
+    def _episode(self, env, agent, log_trajectory=False, visualize=False):
         '''
         :param env:
         :param agent:
@@ -117,11 +129,3 @@ class Trainer:
             timestep += 1
 
         return retval(timestep)
-
-    @toolz.curry
-    def episodic_rewards(self, env, agent, n_episodes=1):
-        rewards = [self.rollout(env, agent, log_trajectory=False) for _ in range(n_episodes)]
-        return sum(rewards) / n_episodes
-
-    def validate(self, agent: Agent):
-        return self.episodic_rewards(self.validation_env, agent, self.validation_episodes)
