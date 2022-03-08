@@ -8,6 +8,7 @@ from agents.agent_typing import Agent
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
 from algorithms.algorithm_typing import Trajectory, FitnessMeasure
 from algorithms.novelty_search import NoveltySearch
+from algorithms.operators.archive import ProbabilisticArchive
 from algorithms.operators.knn_novelty import archive_to_knn_novelty
 from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
@@ -15,19 +16,6 @@ from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
 from loggers.wandb_log import WandbLogger
 
-
-class ProbabilisticArchive:
-    def __init__(self, archive_pr: float):
-        self.pr = archive_pr
-        self._archive = []
-
-    def store(self, items):
-        to_add = list(toolz.random_sample(self.pr, items))
-
-        self._archive.extend(to_add)
-
-    def retrieve(self):
-        return self._archive.copy()
 
 @toolz.curry
 def last_observation_bc(env, traj: Trajectory, add_timestep=False):
