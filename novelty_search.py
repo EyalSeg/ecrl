@@ -9,22 +9,13 @@ from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noi
 from algorithms.algorithm_typing import Trajectory, FitnessMeasure
 from algorithms.novelty_search import NoveltySearch
 from algorithms.operators.archive import ProbabilisticArchive
+from algorithms.operators.behavior_characteristic import last_observation_bc
 from algorithms.operators.knn_novelty import archive_to_knn_novelty
 from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
 from loggers.wandb_log import WandbLogger
-
-
-@toolz.curry
-def last_observation_bc(env, traj: Trajectory, add_timestep=False):
-    last_observation = traj.observations[-1]
-
-    if add_timestep:
-        last_observation = np.append(last_observation, len(traj.observations) / env._max_episode_steps)
-
-    return last_observation
 
 
 if __name__ == "__main__":
