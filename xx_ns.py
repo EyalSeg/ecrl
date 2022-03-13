@@ -42,7 +42,7 @@ if __name__ == "__main__":
     logger = CompositeLogger([
         ConsoleLogger(),
         WandbLogger("ecrl", "eyal-segal", config={
-            "Algorithm": "Novelty Search",
+            "Algorithm": "Explore Exploit Novelty Search",
             "env": args.env,
             "popsize": args.popsize,
             "validation_episodes": args.validation_episodes,
