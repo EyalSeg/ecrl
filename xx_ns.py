@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 
 import toolz
-
 import numpy as np
 
 from functools import partial
@@ -34,28 +33,30 @@ if __name__ == "__main__":
     parser.add_argument("--ratio", type=float)
     parser.add_argument("--ratio_growth", type=float)
     parser.add_argument("--ratio_decay", type=float)
-
-
+    parser.add_argument("--group", type=str, default=None)
 
     args = parser.parse_args()
 
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger("ecrl", "eyal-segal", config={
-            "Algorithm": "Explore Exploit Novelty Search",
-            "env": args.env,
-            "popsize": args.popsize,
-            "validation_episodes": args.validation_episodes,
-            "mutation_strength": args.mutation_strength,
-            "truncation_size": args.truncation_size,
-            "novelty_neighbors": args.novelty_neighbors,
-            "archive_pr": args.archive_pr,
-            "elite_candidates": args.elite_candidates,
-            "elite_robustness": args.elite_robustness,
-            "ratio": args.ratio,
-            "ratio_growth": args.ratio_growth,
-            "ratio_decay": args.ratio_decay,
-        })
+        WandbLogger(
+            "ecrl", "eyal-segal",
+            config={
+                "Algorithm": "Explore Exploit Novelty Search",
+                "env": args.env,
+                "popsize": args.popsize,
+                "validation_episodes": args.validation_episodes,
+                "mutation_strength": args.mutation_strength,
+                "truncation_size": args.truncation_size,
+                "novelty_neighbors": args.novelty_neighbors,
+                "archive_pr": args.archive_pr,
+                "elite_candidates": args.elite_candidates,
+                "elite_robustness": args.elite_robustness,
+                "ratio": args.ratio,
+                "ratio_growth": args.ratio_growth,
+                "ratio_decay": args.ratio_decay,
+            },
+            group=args.group)
     ])
 
     trainer = Trainer(env_name=args.env,
