@@ -37,32 +37,33 @@ class Trainer:
         self.logger = logger
         self.log_callbacks = log_callbacks
 
+        self.local_elite = None
+        self.local_elite_value = None
+
+        self.global_elite = None
+        self.global_elite_value = -inf
+
     def fit(self, algorithm: EvolutionaryAlgorithm):
         gen = 0
-        local_elite = None
-        local_elite_value = None
-
-        global_elite = None
-        global_elite_value = -inf
 
         while self.train_env.step_count < self.max_train_steps:
             algorithm.generation()
 
-            if local_elite != algorithm.elite:
-                local_elite = algorithm.elite
-                local_elite_value = self.validate(local_elite)
+            if self.local_elite != algorithm.elite:
+                self.local_elite = algorithm.elite
+                self.local_elite_value = self.validate(self.local_elite)
 
-            if local_elite_value > global_elite_value:
-                global_elite = local_elite
-                global_elite_value = local_elite_value
+            if self.local_elite_value > self.global_elite_value:
+                self.global_elite = self.local_elite
+                self.global_elite_value = self.local_elite_value
 
             if self.logger:
                 logs = {
                     "train_step": self.train_env.step_count,
                     "generation": gen,
                     "train_fitness": algorithm.elite_fitness,
-                    "validation_fitness": local_elite_value,
-                    "cummulative_validation_fitness": global_elite_value,
+                    "validation_fitness": self.local_elite_value,
+                    "cummulative_validation_fitness": self.global_elite_value,
                 }
 
                 callbacked = [callback(algorithm) for callback in self.log_callbacks]
@@ -72,8 +73,6 @@ class Trainer:
                 self.logger.log(logs)
 
             gen += 1
-
-        return local_elite, local_elite_value
 
     @toolz.curry
     def rollout(self, env, agent, visualize=False) -> Trajectory:
