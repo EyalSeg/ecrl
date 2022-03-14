@@ -1,4 +1,5 @@
 from typing import Callable, List
+from math import inf
 
 import gym
 import toolz
@@ -38,22 +39,30 @@ class Trainer:
 
     def fit(self, algorithm: EvolutionaryAlgorithm):
         gen = 0
-        elite = None
-        elite_value = None
+        local_elite = None
+        local_elite_value = None
+
+        global_elite = None
+        global_elite_value = -inf
 
         while self.train_env.step_count < self.max_train_steps:
             algorithm.generation()
 
-            if elite != algorithm.elite:
-                elite = algorithm.elite
-                elite_value = self.validate(elite)
+            if local_elite != algorithm.elite:
+                local_elite = algorithm.elite
+                local_elite_value = self.validate(local_elite)
+
+            if local_elite_value > global_elite_value:
+                global_elite = local_elite
+                global_elite_value = local_elite_value
 
             if self.logger:
                 logs = {
                     "train_step": self.train_env.step_count,
                     "generation": gen,
                     "train_fitness": algorithm.elite_fitness,
-                    "validation_fitness": elite_value,
+                    "validation_fitness": local_elite_value,
+                    "cummulative_validation_fitness": global_elite_value,
                 }
 
                 callbacked = [callback(algorithm) for callback in self.log_callbacks]
@@ -64,7 +73,7 @@ class Trainer:
 
             gen += 1
 
-        return elite, elite_value
+        return local_elite, local_elite_value
 
     @toolz.curry
     def rollout(self, env, agent, visualize=False) -> Trajectory:
