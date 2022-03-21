@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 import toolz
+import mlflow
 import numpy as np
 
 from functools import partial
@@ -14,7 +15,6 @@ from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
-from loggers.wandb_log import WandbLogger
 
 
 if __name__ == "__main__":
@@ -33,30 +33,17 @@ if __name__ == "__main__":
     parser.add_argument("--ratio", type=float)
     parser.add_argument("--ratio_growth", type=float)
     parser.add_argument("--ratio_decay", type=float)
-    parser.add_argument("--group", type=str, default=None)
 
     args = parser.parse_args()
 
+    mlflow.log_params(args.__dict__)
+    mlflow.log_param("algorithm", "Explore Exploit Novelty Search")
+
+    mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
+
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger(
-            "ecrl", "eyal-segal",
-            config={
-                "Algorithm": "Explore Exploit Novelty Search",
-                "env": args.env,
-                "popsize": args.popsize,
-                "validation_episodes": args.validation_episodes,
-                "mutation_strength": args.mutation_strength,
-                "truncation_size": args.truncation_size,
-                "novelty_neighbors": args.novelty_neighbors,
-                "archive_pr": args.archive_pr,
-                "elite_candidates": args.elite_candidates,
-                "elite_robustness": args.elite_robustness,
-                "ratio": args.ratio,
-                "ratio_growth": args.ratio_growth,
-                "ratio_decay": args.ratio_decay,
-            },
-            group=args.group)
+        mlflow_logger,
     ])
 
     trainer = Trainer(env_name=args.env,
@@ -75,9 +62,8 @@ if __name__ == "__main__":
         return bc
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
-                   56,
-                   56,
-                   56,
+                   256,
+                   256,
                    trainer.train_env.action_space.n]
 
     init_agent = toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent)
@@ -85,7 +71,6 @@ if __name__ == "__main__":
     mutator = add_gaussian_noise(args.mutation_strength)
     selector = truncated_selection(args.truncation_size)
     rollout = trainer.rollout(trainer.train_env, visualize=False)
-
 
     alg = AdaptiveExploreExploit(
         popsize=args.popsize,
