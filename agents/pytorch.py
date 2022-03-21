@@ -8,13 +8,14 @@ from typing import Literal
 
 device = "cuda:0" if torch.cuda.is_available() else 'cpu'
 
+
 class LinearTorchPolicy(nn.Module):
     def __init__(self, dimensions):
         super(LinearTorchPolicy, self).__init__()
 
         dims = toolz.sliding_window(2, dimensions)
         linears = [torch.nn.Linear(in_dim, out_dim) for in_dim, out_dim in dims]
-        activations = [nn.ReLU() for _ in range(len(linears) - 1)]
+        activations = [nn.Tanh() for _ in range(len(linears) - 1)]
 
         net = toolz.interleave([linears, activations])
 
