@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from functools import partial
 
 import toolz
-import numpy as np
+import mlflow
 
 from agents.agent_typing import Agent
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
@@ -15,7 +15,6 @@ from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
-from loggers.wandb_log import WandbLogger
 
 
 if __name__ == "__main__":
@@ -34,20 +33,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    mlflow.log_params(args.__dict__)
+    mlflow.log_param("algorithm", "Novelty Search")
+
+    mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
+
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger("ecrl", "eyal-segal", config={
-            "Algorithm": "Novelty Search",
-            "env": args.env,
-            "popsize": args.popsize,
-            "validation_episodes": args.validation_episodes,
-            "elite_robustness": args.elite_robustness,
-            "elite_candidates": args.elite_candidates,
-            "mutation_strength": args.mutation_strength,
-            "truncation_size": args.truncation_size,
-            "novelty_neighbors": args.novelty_neighbors,
-            "archive_pr": args.archive_pr,
-        })
+        mlflow_logger,
     ])
 
     trainer = Trainer(env_name=args.env,
