@@ -10,3 +10,4 @@ mlflow
 pytorch-lightning==1.5.1
 torch
 Box2D
+box2d-kengz
