@@ -2,13 +2,13 @@ from argparse import ArgumentParser
 from functools import partial
 
 import toolz
+import mlflow
 
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent
 from algorithms.random_search import RandomSearch
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
-from loggers.wandb_log import WandbLogger
 
 
 if __name__ == "__main__":
@@ -21,14 +21,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    mlflow.log_params(args.__dict__)
+    mlflow.log_param("algorithm", "Random Search")
+
+    mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
+
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger("ecrl", "eyal-segal", config={
-            "Algorithm": "Random Search",
-            "env": args.env,
-            "validation_episodes": args.validation_episodes,
-            "fitness_robustness": args.fitness_robustness,
-        })
+        mlflow_logger
     ])
 
     trainer = Trainer(args.env, max_train_steps=args.train_steps, validation_episodes=args.validation_episodes, logger=logger)
