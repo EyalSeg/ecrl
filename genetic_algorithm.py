@@ -2,13 +2,13 @@ from argparse import ArgumentParser
 from functools import partial
 
 import toolz
+import mlflow
 
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
 from algorithms.genetic_algorithm import GeneticAlgorithm
 from algorithms.operators.selection import truncated_selection, find_true_elite
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
-from loggers.wandb_log import WandbLogger
 from algorithms.trainer import Trainer
 
 
@@ -27,19 +27,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    mlflow.log_params(args.__dict__)
+    mlflow.log_param("algorithm", "Genetic Algorithm")
+
+    mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
+
     logger = CompositeLogger([
         ConsoleLogger(),
-        WandbLogger("ecrl", "eyal-segal", config={
-            "Algorithm": "Genetic Algorithm",
-            "env": args.env,
-            "popsize": args.popsize,
-            "validation_episodes": args.validation_episodes,
-            "elite_robustness": args.elite_robustness,
-            "elite_candidates": args.elite_candidates,
-            "mutation_strength": args.mutation_strength,
-            "truncation_size": args.truncation_size,
-            "elitism": args.elitism
-        })
+        mlflow_logger,
     ])
 
     trainer = Trainer(env_name=args.env,
