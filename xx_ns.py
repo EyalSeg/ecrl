@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+from gym.spaces import Box, Discrete
 import toolz
 import mlflow
 import numpy as np
@@ -15,6 +16,7 @@ from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
+
 
 
 if __name__ == "__main__":
@@ -61,13 +63,22 @@ if __name__ == "__main__":
         bc = np.append(last_obs, last_timestep)
         return bc
 
+    is_discrete = isinstance(trainer.train_env.action_space, Discrete)
+
     policy_dims = [sum(trainer.train_env.observation_space.shape),
                    256,
                    256,
-                   trainer.train_env.action_space.n]
+                   trainer.train_env.action_space.n if is_discrete else trainer.train_env.action_space.shape[0]]
 
-    init_agent = toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent)
-    initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
+    def initializer():
+        policy = LinearTorchPolicy(policy_dims)
+        if is_discrete:
+            agent = TorchPolicyAgent(policy, mode="discrete-deterministic")
+        else:
+            agent = TorchPolicyAgent(policy, mode="continuous")
+
+        return agent
+
     mutator = add_gaussian_noise(args.mutation_strength)
     selector = truncated_selection(args.truncation_size)
     rollout = trainer.rollout(trainer.train_env, visualize=False)
