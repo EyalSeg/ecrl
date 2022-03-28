@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from functools import partial
 
+from gym.spaces import Box, Discrete
+
 import toolz
 import mlflow
 
@@ -33,13 +35,22 @@ if __name__ == "__main__":
 
     trainer = Trainer(args.env, max_train_steps=args.train_steps, validation_episodes=args.validation_episodes, logger=logger)
 
-    policy_dims = [sum(trainer.train_env.observation_space.shape),
-                   56,
-                   56,
-                   56,
-                   trainer.train_env.action_space.n]
+    is_discrete = isinstance(trainer.train_env.action_space, Discrete)
 
-    initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
+    policy_dims = [sum(trainer.train_env.observation_space.shape),
+                   256,
+                   256,
+                   trainer.train_env.action_space.n if is_discrete else trainer.train_env.action_space.shape[0]]
+
+    def initializer():
+        policy = LinearTorchPolicy(policy_dims)
+        if is_discrete:
+            agent = TorchPolicyAgent(policy, mode="discrete-deterministic")
+        else:
+            agent = TorchPolicyAgent(policy, mode="continuous")
+
+        return agent
+
     fitness = trainer.episodic_rewards(trainer.train_env, n_episodes=args.fitness_robustness)
 
     rs = RandomSearch(initializer, fitness)
