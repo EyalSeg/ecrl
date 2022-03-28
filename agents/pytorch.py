@@ -5,6 +5,7 @@ import numpy as np
 import toolz
 
 from typing import Literal
+policy_modes = Literal["discrete-deterministic", "discrete-probabilistic", "continuous"]
 
 device = "cuda:0" if torch.cuda.is_available() else 'cpu'
 
@@ -28,7 +29,7 @@ class LinearTorchPolicy(nn.Module):
 
 
 class TorchPolicyAgent:
-    def __init__(self, policy: torch.nn.Module, mode: Literal["deterministic", "probabilistic"] = "deterministic"):
+    def __init__(self, policy: torch.nn.Module, mode: policy_modes = "discrete-deterministic"):
         self.policy = policy
         self.mode = mode
 
@@ -37,10 +38,12 @@ class TorchPolicyAgent:
     def act(self, observation: np.ndarray):
         action_values = self.policy.forward(torch.Tensor(observation).to(device))
 
-        if self.mode == "deterministic":
+        if self.mode == "discrete-deterministic":
             action = torch.argmax(action_values).item()
-        elif self.mode == "probabilistic":
+        elif self.mode == "discrete-probabilistic":
             raise NotImplemented(f"No implemenation for mode: {self.mode}")
+        elif self.mode == "continuous":
+            action = action_values.detach().cpu().numpy()
         else:
             raise Exception("Unrecognised mode: " + self.mode)
 

@@ -105,14 +105,15 @@ class Trainer:
                 (env._max_episode_steps, *env.observation_space.shape),
                 np.nan)
 
-            actions = np.full(env._max_episode_steps, np.nan)
+            # actions = np.full(env._max_episode_steps, np.nan)
+            actions = []
 
             def on_timestep(t, s, a, r):
                 observations[t, :] = s
-                actions[t] = a
+                actions.append(a)
                 rewards[t] = r
 
-            retval = lambda t: (observations[:t], actions[:t], rewards[:t])
+            retval = lambda t: (observations[:t], np.array(actions[:t]), rewards[:t])
 
         else:
             rewards = [0]
