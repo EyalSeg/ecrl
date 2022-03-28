@@ -4,6 +4,8 @@ from functools import partial
 import toolz
 import mlflow
 
+from gym.spaces import Box, Discrete
+
 from agents.agent_typing import Agent
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
 from algorithms.algorithm_typing import Trajectory, FitnessMeasure
@@ -48,13 +50,22 @@ if __name__ == "__main__":
                       validation_episodes=args.validation_episodes,
                       logger=logger)
 
-    policy_dims = [sum(trainer.train_env.observation_space.shape),
-                   56,
-                   56,
-                   56,
-                   trainer.train_env.action_space.n]
+    is_discrete = isinstance(trainer.train_env.action_space, Discrete)
 
-    initializer = partial(toolz.compose_left(LinearTorchPolicy, TorchPolicyAgent), policy_dims)
+    policy_dims = [sum(trainer.train_env.observation_space.shape),
+                   256,
+                   256,
+                   trainer.train_env.action_space.n if is_discrete else trainer.train_env.action_space.shape[0]]
+
+    def initializer():
+        policy = LinearTorchPolicy(policy_dims)
+        if is_discrete:
+            agent = TorchPolicyAgent(policy, mode="discrete-deterministic")
+        else:
+            agent = TorchPolicyAgent(policy, mode="continuous")
+
+        return agent
+
     rollout = trainer.rollout(trainer.train_env, visualize=False)
     mutator = add_gaussian_noise(args.mutation_strength)
     selector = truncated_selection(args.truncation_size)
