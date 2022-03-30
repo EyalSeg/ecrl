@@ -2,6 +2,8 @@ from typing import Callable, List
 from math import inf
 
 import gym
+import pybulletgym  # register PyBullet enviroments with open ai gym
+
 import toolz
 import numpy as np
 
