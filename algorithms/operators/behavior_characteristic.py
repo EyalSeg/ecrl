@@ -9,6 +9,6 @@ def last_observation_bc(env, traj: Trajectory, add_timestep=False):
     last_observation = traj.observations[-1]
 
     if add_timestep:
-        last_observation = append(last_observation, len(traj.observations) / env._max_episode_steps)
+        last_observation = append(last_observation, len(traj.observations))
 
     return last_observation
