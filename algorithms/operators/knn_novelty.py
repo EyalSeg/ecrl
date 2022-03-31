@@ -1,12 +1,9 @@
-from functools import lru_cache
-from hashlib import sha1
 from typing import List
 
 import toolz
 import numpy as np
 
-from numpy import all, array, uint8
-
+from sklearn.preprocessing import normalize
 from sklearn.neighbors import NearestNeighbors
 
 from algorithms.algorithm_typing import Archive, BatchFitnessMeasure
@@ -18,10 +15,12 @@ def archive_to_knn_novelty(k: int, archive: Archive[np.array]) -> BatchFitnessMe
         combined = archive.retrieve() + batch
         combined = np.row_stack(combined)
 
+        combined_normalized = normalize(combined, axis=0, norm="max")
+
         # each element in the batch is stored in the knn,
         # we add 1 to retrieve it and ignore it (it is 0 distance)
         knn = NearestNeighbors(n_neighbors=k+1)
-        knn.fit(combined)
+        knn.fit(combined_normalized)
 
         distances, indices = knn.kneighbors(batch)
         avg = np.sum(distances, axis=1) / k
