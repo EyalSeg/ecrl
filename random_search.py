@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     parser.add_argument("--env", type=str)
+    parser.add_argument("--algorithm", type=str, default="Random Search")
     parser.add_argument("--validation_episodes", type=int)
     parser.add_argument("--fitness_robustness", type=int)
     parser.add_argument("--train_steps", type=int)
@@ -24,7 +25,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     mlflow.log_params(args.__dict__)
-    mlflow.log_param("algorithm", "Random Search")
 
     mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
 

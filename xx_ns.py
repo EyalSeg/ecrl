@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     parser.add_argument("--env", type=str)
+    parser.add_argument("--algorithm", type=str, default="Explore Exploit Novelty Search")
     parser.add_argument("--popsize", type=int)
     parser.add_argument("--validation_episodes", type=int)
     parser.add_argument("--mutation_strength", type=float)
@@ -39,7 +40,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     mlflow.log_params(args.__dict__)
-    mlflow.log_param("algorithm", "Explore Exploit Novelty Search")
 
     mlflow_logger = type("Object", (), {"log": lambda metrics: mlflow.log_metrics(metrics, step=metrics["train_step"])})
 
