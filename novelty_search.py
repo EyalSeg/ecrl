@@ -24,6 +24,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--env", type=str, required=True)
     parser.add_argument("--algorithm", type=str, default="Novelty Search")
+    parser.add_argument("--standardize", type=bool, default=False)
     parser.add_argument("--popsize", type=int, required=True)
     parser.add_argument("--validation_episodes", type=int, required=True)
     parser.add_argument("--elite_robustness", type=int, required=True)
@@ -79,7 +80,7 @@ if __name__ == "__main__":
         pop_size=args.popsize,
         initializer=initializer,
         rollout=rollout,
-        novelty_from_archive=archive_to_knn_novelty(args.novelty_neighbors),
+        novelty_from_archive=archive_to_knn_novelty(args.novelty_neighbors, standardize=args.standardize),
         survivors_selector=selector,
         mutator=mutator,
         archive=ProbabilisticArchive(args.archive_pr),

@@ -24,6 +24,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--env", type=str)
     parser.add_argument("--algorithm", type=str, default="Explore Exploit Novelty Search")
+    parser.add_argument("--standardize", type=bool, default=False)
     parser.add_argument("--popsize", type=int)
     parser.add_argument("--validation_episodes", type=int)
     parser.add_argument("--mutation_strength", type=float)
@@ -86,7 +87,7 @@ if __name__ == "__main__":
             trainer.episodic_rewards(trainer.train_env, n_episodes=args.elite_robustness),
             1),
         exploit_fitness=lambda traj: sum(traj.rewards),
-        explore_fitness_from_archive=archive_to_knn_novelty(args.novelty_neighbors),
+        explore_fitness_from_archive=archive_to_knn_novelty(args.novelty_neighbors, standardize=args.standardize),
         ratio_decay=args.ratio_decay,
         ratio_growth=args.ratio_growth,
         explore_exploit_ratio=args.ratio,
