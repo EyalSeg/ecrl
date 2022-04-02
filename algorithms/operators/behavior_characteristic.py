@@ -5,7 +5,7 @@ from algorithms.algorithm_typing import Trajectory
 
 
 @curry
-def last_observation_bc(env, traj: Trajectory, add_timestep=False):
+def last_observation_bc(traj: Trajectory, add_timestep=False):
     last_observation = traj.observations[-1]
 
     if add_timestep:

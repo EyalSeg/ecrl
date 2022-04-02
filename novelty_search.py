@@ -83,7 +83,7 @@ if __name__ == "__main__":
         survivors_selector=selector,
         mutator=mutator,
         archive=ProbabilisticArchive(args.archive_pr),
-        behavior_characteristic=last_observation_bc(trainer.train_env, add_timestep=True),
+        behavior_characteristic=last_observation_bc(add_timestep=True),
         elite_extractor=elite_extractor,
         fitness=lambda traj: sum(traj.rewards),
     )

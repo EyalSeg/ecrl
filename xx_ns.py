@@ -53,16 +53,6 @@ if __name__ == "__main__":
                       validation_episodes=args.validation_episodes,
                       logger=logger)
 
-    def last_observation_and_timestep_bc(trajectory):
-        observations, _, _ = zip(trajectory)
-        observations = observations[0]
-
-        last_obs = observations[-1]
-        last_timestep = len(observations) / trainer.train_env._max_episode_steps
-
-        bc = np.append(last_obs, last_timestep)
-        return bc
-
     is_discrete = isinstance(trainer.train_env.action_space, Discrete)
 
     policy_dims = [sum(trainer.train_env.observation_space.shape),
@@ -90,7 +80,7 @@ if __name__ == "__main__":
         survivor_selection=selector,
         rollout=rollout,
         archive=ProbabilisticArchive(args.archive_pr),
-        behavior_characteristic=last_observation_bc(trainer.train_env, add_timestep=True),
+        behavior_characteristic=last_observation_bc(add_timestep=True),
         elite_extractor=find_true_elite(
             args.elite_candidates,
             trainer.episodic_rewards(trainer.train_env, n_episodes=args.elite_robustness),
