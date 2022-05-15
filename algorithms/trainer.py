@@ -78,9 +78,9 @@ class Trainer:
 
     @toolz.curry
     def rollout(self, env, agent, visualize=False) -> Trajectory:
-        observations, actions, rewards = self._episode(env, agent, log_trajectory=True, visualize=visualize)
+        observations, actions, rewards, positions = self._episode(env, agent, log_trajectory=True, visualize=visualize)
 
-        return Trajectory(observations=observations, actions=actions, rewards=rewards)
+        return Trajectory(observations=observations, actions=actions, rewards=rewards, positions=positions)
 
     @toolz.curry
     def episodic_rewards(self, env, agent, n_episodes=1) -> float:
@@ -105,22 +105,28 @@ class Trainer:
             rewards = np.full(env._max_episode_steps, np.nan)
             observations = np.full(
                 (env._max_episode_steps, *env.observation_space.shape),
-                np.nan)
+                np.nan
+            )
+            positions = np.full(
+                (env._max_episode_steps, 3),
+                np.nan
+            )
 
             # actions = np.full(env._max_episode_steps, np.nan)
             actions = []
 
-            def on_timestep(t, s, a, r):
+            def on_timestep(t, s, a, r, p):
                 observations[t, :] = s
                 actions.append(a)
                 rewards[t] = r
+                positions[t, :] = p
 
-            retval = lambda t: (observations[:t], np.array(actions[:t]), rewards[:t])
+            retval = lambda t: (observations[:t], np.array(actions[:t]), rewards[:t], positions[:t])
 
         else:
             rewards = [0]
 
-            def on_timestep(t, s, a, r):
+            def on_timestep(t, s, a, r, p):
                 rewards[0] += r
 
             retval = lambda t: rewards[0]
@@ -135,8 +141,9 @@ class Trainer:
 
             action = agent.act(observation)
             observation_, reward, done, info = env.step(action)
+            xyz = env.robot.body_xyz if hasattr(env, "robot") else np.full(3, np.nan)
 
-            on_timestep(timestep, observation, action, reward)
+            on_timestep(timestep, observation, action, reward, xyz)
 
             observation = observation_
             timestep += 1

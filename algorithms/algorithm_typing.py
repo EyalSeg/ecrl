@@ -11,6 +11,7 @@ class Trajectory:
     observations: array
     actions: array
     rewards: array
+    positions: array
 
 
 BC = TypeVar('BC')
