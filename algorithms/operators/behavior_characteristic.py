@@ -21,3 +21,15 @@ def last_position_bc(traj: Trajectory, add_timestep=False):
         last_position = append(last_position, len(traj.positions))
 
     return last_position
+
+@curry
+def last_observation_and_position_bc(traj: Trajectory, add_timestep=False)
+    bc = append(
+        last_observation_bc(traj),
+        last_position_bc(traj)
+    )
+
+    if add_timestep:
+        bc = append(bc, len(traj.positions))
+
+    return bc
