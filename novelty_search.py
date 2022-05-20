@@ -11,7 +11,7 @@ from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noi
 from algorithms.algorithm_typing import Trajectory, FitnessMeasure
 from algorithms.novelty_search import NoveltySearch
 from algorithms.operators.archive import ProbabilisticArchive
-from algorithms.operators.behavior_characteristic import last_observation_bc, last_position_bc
+from algorithms.operators.behavior_characteristic import *
 from algorithms.operators.knn_novelty import archive_to_knn_novelty
 from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
@@ -76,7 +76,8 @@ if __name__ == "__main__":
         trainer.episodic_rewards(trainer.train_env, n_episodes=args.elite_robustness),
         1)
 
-    bc = last_position_bc if "PyBulletEnv" in args.env else last_observation_bc(add_timestep=True)
+    bc = last_observation_and_position_bc(add_timestep=True) if "PyBulletEnv" in args.env\
+        else last_observation_bc(add_timestep=True)
 
     ns = NoveltySearch(
         pop_size=args.popsize,
