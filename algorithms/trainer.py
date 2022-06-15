@@ -2,7 +2,6 @@ from typing import Callable, List
 from math import inf
 
 import gym
-import pybulletgym  # register PyBullet enviroments with open ai gym
 
 import toolz
 import numpy as np
@@ -17,7 +16,6 @@ class StepsMonitoringWrapper(gym.Wrapper):
         super().__init__(env)
 
         self.step_count = 0
-        self._max_episode_steps = env._max_episode_steps
 
     def step(self, action):
         self.step_count += 1
@@ -29,6 +27,11 @@ class Trainer:
     def __init__(self, env_name: str, max_train_steps: int, validation_episodes: int,
                  logger: Logger = None, log_callbacks: List[Callable[[EvolutionaryAlgorithm], dict]] = ()):
         self.env_name = env_name
+
+        if "pybullet" in self.env_name.lower():
+            import pybulletgym  # register PyBullet enviroments with open ai gym
+        else:
+            import envs # import custom mujoco envs
 
         self.max_train_steps = max_train_steps
         self.validation_episodes = validation_episodes
@@ -102,13 +105,18 @@ class Trainer:
         Otherwise, will return the sum of rewards.
         '''
         if log_trajectory:
-            rewards = np.full(env._max_episode_steps, np.nan)
+
+            _env = env
+            while not hasattr(_env, "_max_episode_steps"):
+                _env = _env.env
+
+            rewards = np.full(_env._max_episode_steps, np.nan)
             observations = np.full(
-                (env._max_episode_steps, *env.observation_space.shape),
+                (_env._max_episode_steps, *env.observation_space.shape),
                 np.nan
             )
             positions = np.full(
-                (env._max_episode_steps, 3),
+                (_env._max_episode_steps, 3),
                 np.nan
             )
 
