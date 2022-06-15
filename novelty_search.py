@@ -76,8 +76,7 @@ if __name__ == "__main__":
         trainer.episodic_rewards(trainer.train_env, n_episodes=args.elite_robustness),
         1)
 
-    bc = last_observation_and_position_bc(add_timestep=True) if "PyBulletEnv" in args.env\
-        else last_observation_bc(add_timestep=True)
+    bc = last_position_bc(add_timestep=False)
 
     ns = NoveltySearch(
         pop_size=args.popsize,
