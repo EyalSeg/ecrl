@@ -6,7 +6,7 @@ from envs.small_maze_deceptive import SmallMazeDeceptive
 
 gym.envs.register(
     id="PointMazeSmallDeceptive-v0",
-    entry_point="envs.step_limited_maze_env:TimeLimitedMazeEnv",
+    entry_point="envs.step_limited_maze_env:StepLimitedMazeEnv",
     kwargs=dict(
         model_cls=PointEnv,
         maze_task=SmallMazeDeceptive,
@@ -18,7 +18,7 @@ gym.envs.register(
 
 gym.envs.register(
     id="AntMazeSmallDeceptive-v0",
-    entry_point="envs.step_limited_maze_env:TimeLimitedMazeEnv",
+    entry_point="envs.step_limited_maze_env:StepLimitedMazeEnv",
     kwargs=dict(
         model_cls=AntEnv,
         maze_task=SmallMazeDeceptive,
@@ -30,7 +30,7 @@ gym.envs.register(
 
 gym.envs.register(
     id="PointMazeLargeDeceptive-v0",
-    entry_point="envs.step_limited_maze_env:TimeLimitedMazeEnv",
+    entry_point="envs.step_limited_maze_env:StepLimitedMazeEnv",
     kwargs=dict(
         model_cls=PointEnv,
         maze_task=LargeMazeDeceptive,
@@ -42,7 +42,7 @@ gym.envs.register(
 
 gym.envs.register(
     id="AntMazeLargeDeceptive-v0",
-    entry_point="envs.step_limited_maze_env:TimeLimitedMazeEnv",
+    entry_point="envs.step_limited_maze_env:StepLimitedMazeEnv",
     kwargs=dict(
         model_cls=AntEnv,
         maze_task=LargeMazeDeceptive,
