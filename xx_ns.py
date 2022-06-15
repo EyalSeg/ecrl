@@ -10,13 +10,12 @@ from functools import partial
 from agents.pytorch import LinearTorchPolicy, TorchPolicyAgent, add_gaussian_noise
 from algorithms.adaptive_explore_exploit import AdaptiveExploreExploit
 from algorithms.operators.archive import ProbabilisticArchive
-from algorithms.operators.behavior_characteristic import last_observation_bc
+from algorithms.operators.behavior_characteristic import last_observation_bc, last_position_bc
 from algorithms.operators.knn_novelty import archive_to_knn_novelty
 from algorithms.operators.selection import truncated_selection, find_true_elite
 from algorithms.trainer import Trainer
 from loggers.composite_logger import CompositeLogger
 from loggers.console_logger import ConsoleLogger
-
 
 
 if __name__ == "__main__":
@@ -81,7 +80,7 @@ if __name__ == "__main__":
         survivor_selection=selector,
         rollout=rollout,
         archive=ProbabilisticArchive(args.archive_pr),
-        behavior_characteristic=last_observation_bc(add_timestep=True),
+        behavior_characteristic=last_position_bc(),
         elite_extractor=find_true_elite(
             args.elite_candidates,
             trainer.episodic_rewards(trainer.train_env, n_episodes=args.elite_robustness),
