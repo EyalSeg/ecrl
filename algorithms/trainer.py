@@ -116,7 +116,7 @@ class Trainer:
                 np.nan
             )
             positions = np.full(
-                (_env._max_episode_steps, 3),
+                (_env._max_episode_steps, 2),
                 np.nan
             )
 
@@ -149,9 +149,8 @@ class Trainer:
 
             action = agent.act(observation)
             observation_, reward, done, info = env.step(action)
-            xyz = env.robot.body_xyz if hasattr(env, "robot") else np.full(3, np.nan)
 
-            on_timestep(timestep, observation, action, reward, xyz)
+            on_timestep(timestep, observation, action, reward, info['position'])
 
             observation = observation_
             timestep += 1
