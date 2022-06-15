@@ -9,9 +9,12 @@ class SmallMazeDeceptive(MazeTask):
 
     def __init__(self, scale):
         super().__init__(scale)
-        self.goals = [MazeGoal(np.array([0.0, -3.0]) * scale)]
+        self.goals = [MazeGoal(np.array([0.0, -6.0]) * scale, threshold=1)]
 
     def reward(self, obs):
+        if self.termination(obs):
+            return 10000
+
         distances = [goal.euc_dist(obs) for goal in self.goals]
 
         return sum(distances) * -1
@@ -21,6 +24,9 @@ class SmallMazeDeceptive(MazeTask):
         o, I, R = MazeCell.EMPTY, MazeCell.BLOCK, MazeCell.ROBOT,
         return [
             [I, I, I, I, I, I, I],
+            [I, o, o, o, o, o, I],
+            [I, o, o, o, o, o, I],
+            [I, o, o, o, o, o, I],
             [I, o, o, o, o, o, I],
             [I, o, I, I, I, o, I],
             [I, o, I, o, I, o, I],

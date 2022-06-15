@@ -12,7 +12,7 @@ gym.envs.register(
         maze_task=SmallMazeDeceptive,
         maze_size_scaling=SmallMazeDeceptive.MAZE_SIZE_SCALING.point,
         inner_reward_scaling=0,
-        time_limit=200
+        time_limit=500,
     )
 )
 
@@ -24,7 +24,7 @@ gym.envs.register(
         maze_task=SmallMazeDeceptive,
         maze_size_scaling=SmallMazeDeceptive.MAZE_SIZE_SCALING.ant,
         inner_reward_scaling=0,
-        time_limit=500
+        time_limit=750,
     )
 )
 
@@ -36,7 +36,7 @@ gym.envs.register(
         maze_task=LargeMazeDeceptive,
         maze_size_scaling=LargeMazeDeceptive.MAZE_SIZE_SCALING.point,
         inner_reward_scaling=0,
-        time_limit=2000,
+        time_limit=1000,
     )
 )
 
@@ -48,6 +48,6 @@ gym.envs.register(
         maze_task=LargeMazeDeceptive,
         maze_size_scaling=LargeMazeDeceptive.MAZE_SIZE_SCALING.ant,
         inner_reward_scaling=0,
-        time_limit=5000
+        time_limit=2000
     )
 )

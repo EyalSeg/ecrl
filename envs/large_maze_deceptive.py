@@ -4,7 +4,7 @@ from mujoco_maze.maze_task import MazeTask, MazeGoal
 
 
 class LargeMazeDeceptive(MazeTask):
-    REWARD_THRESHOLD: float = 0
+    REWARD_THRESHOLD: float = 1
     PENALTY: float = 0
 
     def __init__(self, scale):
@@ -12,9 +12,12 @@ class LargeMazeDeceptive(MazeTask):
         self.goals = [MazeGoal(np.array([-1.0, -8.0]) * scale)]
 
     def reward(self, obs):
+        if self.termination(obs):
+            return 10000
+
         distances = [goal.euc_dist(obs) for goal in self.goals]
 
-        return sum(distances) * -1
+        return -(sum(distances) / self.scale)
 
     @staticmethod
     def create_maze():
